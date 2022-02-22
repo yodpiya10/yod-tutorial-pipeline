@@ -1,0 +1,50 @@
+name: ENV - Tutorial Frontend Deploy
+
+on:
+  repository_dispatch:
+    types: [yod-tutorial-frontend-cd-dev]
+  workflow_dispatch:
+
+env:
+  REPOSITORY: "yodpiya10/yod-tutorial-frontend"
+  APP_NAME: yod-tutorial-frontend
+  AZURE_WEB_APP_NAME: app-yod-tutorial-frontend-dev-001
+  CONTAINER_REPOSITORY: "acryodtutorial001.azurecr.io"
+  IMAGE_TAG: "0.0.1-SNAPSHOT"
+
+jobs:
+  build-and-deploy-app-service:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+    - name: "Checkout pipelines"
+      uses: actions/checkout@v2
+
+    - name: 'Login via Azure CLI'
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_RBAC_CREDENTIALS }}
+        allow-no-subscriptions: true
+
+    - name: 'Set subscription'
+      run: az account set --subscription fd294c52-0cdd-437b-8af1-0c088390242c
+
+    - name: "Deploy to Azure WebApp"
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ env.AZURE_WEB_APP_NAME }}
+        images: '${{ env.CONTAINER_REPOSITORY }}/${{ env.APP_NAME }}:${{env.IMAGE_TAG}}'
+
+    - name: Set Web App Settings
+      uses: Azure/appservice-settings@v1
+      with:
+        app-name: ${{ env.AZURE_WEB_APP_NAME }}
+        app-settings-json: |
+          [
+            {
+              "name": "VUE_APP_ENPOINT_API_BACKEND",
+              "value": "https://app-yod-tutorial-backend-dev-001.azurewebsites.net/api",
+              "slotSetting": false
+            }
+          ]
