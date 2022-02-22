@@ -1,0 +1,55 @@
+name: ENV - Tutorial backend Deploy
+
+on:
+  repository_dispatch:
+    types: [yod-tutorial-backend-cd-dev]
+  workflow_dispatch:
+
+env:
+  REPOSITORY: "yodpiya10/yod-tutorial-backend"
+  APP_NAME: yod-tutorial-backend
+  AZURE_WEB_APP_NAME: app-yod-tutorial-backend-dev-001
+  CONTAINER_REPOSITORY: "acryodtutorial001.azurecr.io"
+  IMAGE_TAG: "0.0.1-SNAPSHOT"
+
+jobs:
+  build-and-deploy-app-service:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+    - name: "Checkout pipelines"
+      uses: actions/checkout@v2
+
+    - name: 'Login via Azure CLI'
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_RBAC_CREDENTIALS }}
+        allow-no-subscriptions: true
+
+    - name: 'Set subscription'
+      run: az account set --subscription fd294c52-0cdd-437b-8af1-0c088390242c
+
+    - name: "Deploy to Azure WebApp"
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ env.AZURE_WEB_APP_NAME }}
+        images: '${{ env.CONTAINER_REPOSITORY }}/${{ env.APP_NAME }}:${{env.IMAGE_TAG}}'
+
+    - name: Set Web App Settings
+      uses: Azure/appservice-settings@v1
+      with:
+        app-name: ${{ env.AZURE_WEB_APP_NAME }}
+        app-settings-json: |
+          [
+            {
+              "name": "MONGODB_CONNECTION_STRING",
+              "value": "mongodb://cosmos-yod-tutorial-dev-001:pJ9QNQw5UJVhlOwniVXK17h0AMbPBu2GwF2rIDm4a6sd8iuCFGooxifroWoz5XxFVUob2i86erkzMn96WeNWWQ==@cosmos-yod-tutorial-dev-001.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@cosmos-yod-tutorial-dev-001@",
+              "slotSetting": false
+            }
+            {
+              "name": "PORT",
+              "value": "80",
+              "slotSetting": false
+            }
+          ]
