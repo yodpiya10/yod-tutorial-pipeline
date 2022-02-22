@@ -46,7 +46,7 @@ jobs:
               "name": "MONGODB_CONNECTION_STRING",
               "value": "mongodb://cosmos-yod-tutorial-dev-001:pJ9QNQw5UJVhlOwniVXK17h0AMbPBu2GwF2rIDm4a6sd8iuCFGooxifroWoz5XxFVUob2i86erkzMn96WeNWWQ==@cosmos-yod-tutorial-dev-001.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@cosmos-yod-tutorial-dev-001@",
               "slotSetting": false
-            }
+            },
             {
               "name": "PORT",
               "value": "80",
